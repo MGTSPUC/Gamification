@@ -57,3 +57,11 @@
 โค้ดรอบนี้เป็น UI prototype เท่านั้น ยังไม่ได้สร้างหรือ deploy API เหล่านี้
 
 อ้างอิง: [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages), [Apps Script web apps](https://developers.google.com/apps-script/guides/web), [Content Service](https://developers.google.com/apps-script/guides/content)
+
+## Rank-gated avatar wardrobe (prototype)
+- Bronze: natural skin tones, student shirts, ties and standard glasses.
+- Silver: pixel glasses and sprout; Gold: green skin; Platinum: purple skin and horns.
+- Diamond: cyber glasses and bat wings; Supreme: crown and luminous wings.
+- Eligibility uses the highest current rank across the learner's courses; lower-tier items remain available. This is current eligibility, not a permanent historical unlock ledger.
+- Selection, randomization, save and display all enforce the cosmetic eligibility. Existing saved avatars migrate with default values for new fields.
+- The prototype is browser-local only. For live Apps Script integration, compute rank and eligible items server-side and validate avatar saves there; never trust client-supplied rank. Agree on permanent unlocks versus current rank before integrating real accounts.
