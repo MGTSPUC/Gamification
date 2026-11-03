@@ -1,0 +1,19 @@
+// Deploy separately: execute as owner, access Only myself. Never deploy this endpoint to Anyone.
+const TEACHER_MARKBOOK='MARKBOOK_ID';
+const TEACHER_REGISTRATION='REGISTRATION_ID';
+function teacherRead(){
+ const ranks=['Bronze','Silver','Gold','Platinum','Diamond','Supreme'];
+ const names=new Map();(Sheets.Spreadsheets.Values.get(TEACHER_REGISTRATION,"'Form responses 1'!B2:F10000",{valueRenderOption:'FORMATTED_VALUE'}).values||[]).forEach(r=>{if(r[0])names.set(String(r[0]).trim(),String(r[4]||r[3]||'ผู้เรียน').trim())});
+ const groups=new Map();(Sheets.Spreadsheets.Values.get(TEACHER_MARKBOOK,"'รวม'!A2:AS10000",{valueRenderOption:'UNFORMATTED_VALUE'}).values||[]).forEach(r=>{if(!r[1]||r[2]==null||!r[3]||r[40]==null||r[40]==='')return;const score=Number(r[40]);if(!Number.isFinite(score))return;const course=String(r[1]).trim(),group=String(r[2]).trim(),key=JSON.stringify([course,group]);if(!groups.has(key))groups.set(key,{course,group,rows:[]});groups.get(key).rows.push({name:names.get(String(r[3]).trim())||'ผู้เรียน',score,rank:ranks.includes(r[43])?r[43]:null})});
+ for(const g of groups.values()){g.rows.sort((a,b)=>b.score-a.score);const a=g.rows.map(r=>r.score).reverse(),top=g.rows[Math.min(4,g.rows.length-1)].score;const cuts=[.2,.4,.6,.8].map(p=>{const k=(a.length-1)*p;return a[Math.floor(k)]+(a[Math.ceil(k)]-a[Math.floor(k)])*(k%1)});g.rows.forEach(r=>{if(!r.rank)r.rank=r.score>=top?'Supreme':ranks[cuts.filter(c=>r.score>c).length]})}
+ return {schema:'classup-projector-v1',updatedAt:new Date().toISOString(),groups:[...groups.values()]};
+}
+function doGet(){return HtmlService.createHtmlOutput(TEACHER_HTML_).setTitle('ClassUp · ตัวเชื่อมอาจารย์').addMetaTag('viewport','width=device-width,initial-scale=1')}
+const TEACHER_HTML_=`<!doctype html><html lang="th"><head><base target="_top"><style>body{font:16px/1.8 system-ui;background:#f6f5f0;color:#302b40;padding:30px}main{max-width:540px;margin:auto}button,a{display:inline-block;padding:12px 18px;border:0;border-radius:12px;background:#7350df;color:white;font:inherit;text-decoration:none;margin:6px 0}small{color:#777}#status{background:white;padding:15px;border-radius:12px}</style></head><body><main><h1>ClassUp · ตัวเชื่อมอาจารย์</h1><p>อ่านคะแนนจากสมุดคะแนนหลัก แล้วส่งไปหน้าจอประจำห้องบน GitHub</p><p id="status">พร้อมเชื่อมต่อ</p><button id="read">อ่านข้อมูล / ดาวน์โหลดไฟล์</button><a id="download" hidden>ดาวน์โหลดข้อมูลห้องเรียน</a><p><small>ใช้เฉพาะบัญชีอาจารย์ · ไฟล์มีนามแฝงและคะแนนรวม ไม่รวมรหัสผ่าน อีเมล หรือรหัสนักศึกษา<br>หากส่งข้อมูลอัตโนมัติไม่ได้ ให้นำไฟล์นี้เข้าที่หน้าอาจารย์</small></p></main><script>
+const allowed='https://mgtspuc.github.io';let busy=false;
+function read(send){if(busy)return;busy=true;document.getElementById('status').textContent='กำลังอ่านข้อมูล…';google.script.run.withSuccessHandler(data=>{busy=false;document.getElementById('status').textContent='อ่านแล้ว '+data.groups.length+' ห้อง · '+data.groups.reduce((s,g)=>s+g.rows.length,0)+' รายการ';const a=document.getElementById('download');if(a.href)URL.revokeObjectURL(a.href);a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));a.download='classup-classroom.json';a.hidden=false;if(send)send(data)}).withFailureHandler(()=>{busy=false;document.getElementById('status').textContent='อ่านข้อมูลไม่ได้ โปรดตรวจบัญชีและสิทธิ์เข้าถึงชีต';if(send)send(null)}).teacherRead()}
+document.getElementById('read').onclick=()=>read();
+window.addEventListener('message',e=>{if(e.origin!==allowed||e.data?.type!=='classup-teacher-read'||typeof e.data.requestId!=='string')return;const id=e.data.requestId;read(data=>e.source.postMessage({type:data?'classup-teacher-data':'classup-teacher-error',requestId:id,data},allowed))});
+try{if(window.top.opener)window.top.opener.postMessage({type:'classup-teacher-ready'},allowed)}catch(e){}
+</script></body></html>`;
+
