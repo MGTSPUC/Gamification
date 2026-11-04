@@ -3,3 +3,7 @@
 @media(min-width:1001px){.ranking td{height:42px;padding:4px 8px}.ranking .badge{height:28px;width:28px}.podium-panel{padding:16px 20px}.board-head p{font-size:13px}.board-head h1{margin:3px 0}.summary .metric{padding:10px 20px}footer{padding-top:4px;padding-bottom:4px}}
 @media(min-width:1001px){html.presenting .controls{opacity:0;position:absolute;top:0;left:0;right:0;z-index:5}html.presenting .controls:hover,html.presenting .controls:focus-within{opacity:1}html.presenting .board{padding-top:12px;min-height:0}}
 
+
+
+/* Saved student avatars: preserve the Student SVG viewBox and unclipped headgear. */
+.podium-person > svg.avatar{display:block;width:92px;height:98px;margin:0 auto;border-radius:0;background:none;overflow:visible}.podium-person.winner > svg.avatar{width:112px;height:118px}.runner > svg.avatar{width:38px;height:40px;flex:none;overflow:visible;background:none;border-radius:0}.table-person{display:flex;align-items:center;gap:9px}.table-person > svg.avatar{width:34px;height:36px;flex:none;overflow:visible;background:none;border-radius:0}
